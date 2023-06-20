@@ -19,6 +19,15 @@ def file():
     return current_data
 
 
+def fetch_file_by_id(id_num):
+    blogs = file()
+    id_numbers = [str(blog_id['id']) for blog_id in blogs]
+    if id_num not in id_numbers:
+        return False
+    else:
+        return True
+
+
 @app.route('/add', methods=['GET', 'POST'])
 def add():
     if request.method == "POST":
@@ -55,6 +64,35 @@ def delete(post_id):
     return redirect(url_for('index'))
 
 
+@app.route('/update/{{ blog["id"] }}', methods=['GET', 'POST'])
+def show_form():
+    return render_template('update.html')
+
+@app.route('/update/<post_id>', methods=['GET', 'POST'])
+def update_form(post_id):
+    post = (fetch_file_by_id(post_id))
+    if post is False:
+        # Post not found
+        return "Post not found", 404
+
+    elif request.method == 'POST':
+
+        title = request.form.get('title')
+        author = request.form.get('author')
+        content = request.form.get('content')
+        id_num = post_id
+        new_post = {"id": id_num, "author": author, "title": title, "content": content}
+        with open('blog_data.json', 'r') as fileobj:
+            current_data = json.load(fileobj)
+
+        current_data.append(new_post)
+
+        with open('blog_data.json', 'w') as fileobj:
+            json.dump(current_data, fileobj)
+        return render_template('update.html', post=post)
+
+
 if __name__ == '__main__':
     app.run()
     # print(file())
+    # print(fetch_file_by_id(10))
