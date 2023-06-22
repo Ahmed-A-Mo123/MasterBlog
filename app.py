@@ -22,19 +22,22 @@ def file():
 def fetch_file_by_id(id_num):
     blogs = file()
     id_numbers = [str(blog_id['id']) for blog_id in blogs]
+    post = [post for post in blogs if post['id'] == id_num]
+
     if id_num not in id_numbers:
-        return False
+        return None
     else:
-        return True
+        return post
 
 
 @app.route('/add', methods=['GET', 'POST'])
 def add():
+    data = file()
     if request.method == "POST":
         title = request.form.get('title')
         author = request.form.get('author')
         content = request.form.get('content')
-        id_num = random.randint(4, 100)
+        id_num = data[-1]['id'] + 1
         new_post = {"id": id_num, "author": author, "title": title, "content": content}
         with open('blog_data.json', 'r') as fileobj:
             current_data = json.load(fileobj)
@@ -68,31 +71,38 @@ def delete(post_id):
 def show_form():
     return render_template('update.html')
 
+
 @app.route('/update/<post_id>', methods=['GET', 'POST'])
-def update_form(post_id):
-    post = (fetch_file_by_id(post_id))
-    if post is False:
+def update(post_id):
+    posts = (fetch_file_by_id(post_id))
+    if posts is None:
         # Post not found
         return "Post not found", 404
 
-    elif request.method == 'POST':
-
-        title = request.form.get('title')
-        author = request.form.get('author')
-        content = request.form.get('content')
-        id_num = post_id
-        new_post = {"id": id_num, "author": author, "title": title, "content": content}
+    if request.method == "POST":
+        # Step 1: Read the JSON file
         with open('blog_data.json', 'r') as fileobj:
-            current_data = json.load(fileobj)
+            data = json.load(fileobj)
 
-        current_data.append(new_post)
+        # Step 2: Find the dictionary to update
+        index_to_update = post_id - 1  # Index of the dictionary you want to update
+        dict_to_update = data[index_to_update]
 
+        # Step 3: Modify the dictionary
+        dict_to_update['title'] = request.form.get('title')
+        dict_to_update['author'] = request.form.get('author')
+        dict_to_update['content'] = request.form.get('content')
+
+        # Step 4: Write the updated data structure back to the JSON file
         with open('blog_data.json', 'w') as fileobj:
-            json.dump(current_data, fileobj)
-        return render_template('update.html', post=post)
+            json.dump(data, fileobj, indent=4)
+
+    if request.method == 'GET':
+        return render_template('update.html', post=file())
 
 
 if __name__ == '__main__':
     app.run()
-    # print(file())
-    # print(fetch_file_by_id(10))
+    # data, length = file()
+    # print(length )
+    # print(fetch_file_by_id(1))
