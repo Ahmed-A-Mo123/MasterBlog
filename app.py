@@ -21,7 +21,7 @@ def file():
 
 def fetch_file_by_id(id_num):
     blogs = file()
-    id_numbers = [str(blog_id['id']) for blog_id in blogs]
+    id_numbers = [int(blog_id['id']) for blog_id in blogs]
     post = [post for post in blogs if post['id'] == id_num]
 
     if id_num not in id_numbers:
@@ -74,18 +74,18 @@ def show_form():
 
 @app.route('/update/<post_id>', methods=['GET', 'POST'])
 def update(post_id):
-    posts = (fetch_file_by_id(post_id))
+    posts = fetch_file_by_id(int(post_id))
     if posts is None:
         # Post not found
         return "Post not found", 404
 
-    if request.method == "POST":
+    if request.method == 'POST':
         # Step 1: Read the JSON file
         with open('blog_data.json', 'r') as fileobj:
             data = json.load(fileobj)
 
         # Step 2: Find the dictionary to update
-        index_to_update = post_id - 1  # Index of the dictionary you want to update
+        index_to_update = int(post_id) - 1   # Index of the dictionary you want to update
         dict_to_update = data[index_to_update]
 
         # Step 3: Modify the dictionary
@@ -95,10 +95,10 @@ def update(post_id):
 
         # Step 4: Write the updated data structure back to the JSON file
         with open('blog_data.json', 'w') as fileobj:
-            json.dump(dict_to_update, fileobj)
-
-    if request.method == 'GET':
-        return render_template('update.html', post=file())
+            json.dump(data, fileobj)
+        return render_template('index.html', posts=data)
+    else:
+        return render_template('update.html', post=posts, id=post_id)
 
 
 if __name__ == '__main__':

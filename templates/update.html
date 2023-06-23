@@ -8,7 +8,7 @@
 <body>
     {% for blog in post %}
     <h1>Update Blog Post</h1>
-    <form action="/update/{{ blog['id'] }}" method="POST">
+    <form action="/update/{{ id }}" method="POST">
         <label for="title">Title:</label>
         <input type="text" id="title" name="title" value="{{ blog['title'] }}"><br><br>
         <label for="author">Author:</label>
