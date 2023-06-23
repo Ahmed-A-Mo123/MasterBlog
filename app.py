@@ -95,7 +95,7 @@ def update(post_id):
 
         # Step 4: Write the updated data structure back to the JSON file
         with open('blog_data.json', 'w') as fileobj:
-            json.dump(data, fileobj, indent=4)
+            json.dump(dict_to_update, fileobj)
 
     if request.method == 'GET':
         return render_template('update.html', post=file())
