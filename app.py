@@ -7,12 +7,24 @@ app = Flask(__name__)
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
+    """
+    Renders the index.html template and displays the blog posts.
+
+    Returns:
+        A rendered template with the blog posts.
+    """
     with open('blog_data.json', 'r') as fileobj:
         data = json.load(fileobj)
     return render_template('index.html', posts=data)
 
 
 def file():
+    """
+    Reads the blog_data.json file and returns its content.
+
+    Returns:
+        The content of the blog_data.json file.
+    """
     with open('blog_data.json', 'r') as fileobj:
         current_data = json.load(fileobj)
 
@@ -20,6 +32,15 @@ def file():
 
 
 def fetch_file_by_id(id_num):
+    """
+    Retrieves a blog post from the blog_data.json file by its ID.
+
+    Args:
+        id_num (int): The ID of the blog post.
+
+    Returns:
+        The blog post with the given ID if found, otherwise None.
+    """
     blogs = file()
     id_numbers = [int(blog_id['id']) for blog_id in blogs]
     post = [post for post in blogs if post['id'] == id_num]
@@ -32,6 +53,13 @@ def fetch_file_by_id(id_num):
 
 @app.route('/add', methods=['GET', 'POST'])
 def add():
+    """
+    Adds a new blog post.
+
+    Returns:
+        If the request method is POST, it adds the new post to the blog_data.json file
+        and redirects to the index page. Otherwise, it renders the add.html template.
+    """
     data = file()
     if request.method == "POST":
         title = request.form.get('title')
@@ -52,12 +80,15 @@ def add():
 
 @app.route('/delete/<int:post_id>', methods=['POST'])
 def delete(post_id):
-    # Perform the delete operation using the post_id
+    """
+    Deletes a blog post with the given ID.
 
-    # Example code:
-    # Assuming you have a database or data structure that stores the blog posts,
-    # you can delete the blog post with the given post_id from the data source.
-    # Here's an example assuming you have a list called "posts":
+    Args:
+        post_id (int): The ID of the blog post to be deleted.
+
+    Returns:
+        Redirects to the index page after deleting the blog post.
+    """
     blog_posts = file()
     for blog in blog_posts:
         if blog['id'] == post_id:
@@ -67,13 +98,19 @@ def delete(post_id):
     return redirect(url_for('index'))
 
 
-@app.route('/update/{{ blog["id"] }}', methods=['GET', 'POST'])
-def show_form():
-    return render_template('update.html')
-
-
 @app.route('/update/<post_id>', methods=['GET', 'POST'])
 def update(post_id):
+    """
+    Updates a blog post with the given ID.
+
+    Args:
+        post_id (str): The ID of the blog post to be updated.
+
+    Returns:
+        If the request method is POST, it updates the blog post in the blog_data.json file
+        and redirects to the index page. Otherwise, it renders the update.html template
+        with the blog post to be updated.
+    """
     posts = fetch_file_by_id(int(post_id))
     if posts is None:
         # Post not found
@@ -102,7 +139,4 @@ def update(post_id):
 
 
 if __name__ == '__main__':
-    app.run()
-    # data, length = file()
-    # print(length )
-    # print(fetch_file_by_id(1))
+    app.run(host="0.0.0.0", port=5000, debug=True)
